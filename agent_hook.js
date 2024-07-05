@@ -3,6 +3,8 @@ let subtitleDiv;
 let websocketUrlInput;
 let socket;
 
+const spinner = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
 document.addEventListener('DOMContentLoaded', function () {
 
 	connectButton = document.getElementById('connectButton');
@@ -81,27 +83,31 @@ function set_button(status) {
 		connectButton.removeEventListener('click', close_socket);
 	}
 
-	if (status === STATUS.CONNECTED) {
+	switch (status) {
 
-		btn.classList.add('btn-success')
-		btn.textContent = 'Connected';
-		btn.disabled = false;
-		connectButton.addEventListener('click', close_socket);
+		case STATUS.CONNECTED:
 
-	} else if (status === STATUS.CONNECTING) {
+			btn.classList.add('btn-success')
+			btn.textContent = 'Connected';
+			btn.disabled = false;
+			break;
 
-		btn.classList.add('btn-primary')
-		btn.textContent = 'Connecting...';
-		btn.disabled = true;
+		case STATUS.CONNECTING:
 
-	} else if (status === STATUS.DISCONNECTED) {
+			btn.classList.add('btn-primary')
+			btn.innerHTML = spinner + ' Connecting...';
+			btn.disabled = true;
+			break;
 
-		btn.classList.add('btn-danger')
-		btn.textContent = 'Disconnected';
-		btn.disabled = false;
-		connectButton.addEventListener('click', open_socket);
+		case STATUS.DISCONNECTED:
 
-	} else {
-		console.error('Invalid status:', status);
+			btn.classList.add('btn-danger')
+			btn.textContent = 'Disconnected';
+			btn.disabled = false;
+			break;
+
+		default:
+			console.error('Invalid status:', status);
+
 	}
 }
