@@ -1,23 +1,25 @@
 let connectButton;
-let subtitleDiv;
+let vnTitleComponent;
+let vnTextComponent;
 let websocketUrlInput;
 let socket;
+
+const vnTextRegex = /^(.*?)\s*「(.*)」\s*$/giu;
 
 const spinner = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
 
 document.addEventListener('DOMContentLoaded', function () {
 
 	connectButton = document.getElementById('connectButton');
-	subtitleDiv = document.getElementById('subtitle');
+	vnTitleComponent = document.getElementById('vn-title');
+	vnTextComponent = document.getElementById('vn-text');
 	websocketUrlInput = document.getElementById('websocketUrl');
 
 	connectButton.addEventListener('click', open_socket);
 });
 
 const STATUS = {
-	CONNECTED: 'connected',
-	CONNECTING: 'connecting',
-	DISCONNECTED: 'disconnected'
+	CONNECTED: 'connected', CONNECTING: 'connecting', DISCONNECTED: 'disconnected'
 }
 
 function open_socket() {
@@ -40,10 +42,17 @@ function open_socket() {
 
 	socket.onmessage = function (event) {
 		try {
+
 			const data = JSON.parse(event.data);
-			if (data.type === 'copyText' && data.sentence) {
-				subtitleDiv.textContent = data.sentence;
-			}
+			const {type, sentence, process_path} = data;
+
+			if (!(type === 'copyText' && sentence)) return;
+
+			console.log(data);
+
+			vnTitleComponent.textContent = get_process_name(process_path);
+			vnTextComponent.textContent = sentence;
+
 		} catch (e) {
 			console.error('Error parsing JSON:', e);
 		}
@@ -110,4 +119,12 @@ function set_button(status) {
 			console.error('Invalid status:', status);
 
 	}
+}
+
+function get_process_name(filepath) {
+	return filepath.replaceAll('\\', '/')
+		.split('/')
+		.pop()
+		.split('.')
+		.shift();
 }
